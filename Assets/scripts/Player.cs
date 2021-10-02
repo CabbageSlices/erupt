@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(RotatedVelocity))]
 public class Player : MonoBehaviour
 {
     public Vector2 inputDirection;
@@ -17,34 +18,9 @@ public class Player : MonoBehaviour
 
     public Rigidbody2D body;
 
-    public Vector2 velocityInLocalSpace;
+    RotatedVelocity rotatedVelocity;
 
     bool isGrounded = false;
-
-    public Vector2 right
-    {
-        get
-        {
-            if (transform.up.y < 0)
-            {
-
-                return new Vector2(transform.right.x, transform.right.y).normalized * -1;
-            }
-            else
-            {
-
-                return new Vector2(transform.right.x, transform.right.y).normalized;
-            }
-        }
-    }
-
-    public Vector2 up
-    {
-        get
-        {
-            return new Vector2(transform.up.x, transform.up.y).normalized;
-        }
-    }
 
     private void Awake()
     {
@@ -53,6 +29,7 @@ public class Player : MonoBehaviour
             rotateMe = GetComponent<RotateMe>();
         }
 
+        rotatedVelocity = GetComponent<RotatedVelocity>();
         body = GetComponent<Rigidbody2D>();
     }
 
@@ -66,13 +43,7 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-        velocityInLocalSpace.y -= gameManager.currentGravity * Time.deltaTime;
-        velocityInLocalSpace.x = inputDirection.x * speed;
-
-        Vector2 velocityInWorldSpace = velocityInLocalSpace.x * right + velocityInLocalSpace.y * up;
-
-        body.velocity = velocityInWorldSpace;
+        rotatedVelocity.velocityInLocalSpace.x = inputDirection.x * speed;
     }
 
     public void onMovePressed(InputAction.CallbackContext context)
@@ -84,10 +55,8 @@ public class Player : MonoBehaviour
     {
         if (context.phase == InputActionPhase.Performed)
         {
-            Debug.Log(context.phase);
             onJump();
         }
-
     }
 
     public void onJump()
@@ -95,7 +64,7 @@ public class Player : MonoBehaviour
         if (isGrounded)
         {
 
-            velocityInLocalSpace.y = jumpSpeed;
+            rotatedVelocity.velocityInLocalSpace.y = jumpSpeed;
             isGrounded = false;
             rotateMe.isRotationDisabled = false;
         }
@@ -111,7 +80,7 @@ public class Player : MonoBehaviour
 
             transform.rotation = other.transform.rotation;
             // transform.position = other.transform.position + other.collider.bounds.extents.y * new Vector3(contact.normal.x, contact.normal.y, 0);
-            velocityInLocalSpace.y = 0;
+            rotatedVelocity.velocityInLocalSpace.y = 0;
             isGrounded = true;
             rotateMe.isRotationDisabled = true;
         }
