@@ -7,7 +7,13 @@ using UnityEngine.InputSystem;
 public class Player : MonoBehaviour
 {
     public Vector2 inputDirection;
+
     bool jumpPressed = false;
+    bool jumpHeld = false;
+
+    float timeJumpHoldStarted;
+
+    public float maxTimeJumpCanBeHeld = 0.5f;
 
     public float speed = 15;
     public float jumpSpeed = 15;
@@ -15,12 +21,11 @@ public class Player : MonoBehaviour
     public GameObject blackHole;
     public GameManager gameManager;
     public RotateMe rotateMe;
+    public Collider2D collider;
 
     public Rigidbody2D body;
 
     RotatedVelocity rotatedVelocity;
-
-    bool isGrounded = false;
 
     private void Awake()
     {
@@ -28,6 +33,8 @@ public class Player : MonoBehaviour
         {
             rotateMe = GetComponent<RotateMe>();
         }
+
+        collider = GetComponent<Collider2D>();
 
         rotatedVelocity = GetComponent<RotatedVelocity>();
         body = GetComponent<Rigidbody2D>();
@@ -40,10 +47,28 @@ public class Player : MonoBehaviour
         gameManager = GameObject.FindWithTag("gameManager").GetComponent<GameManager>();
     }
 
+    private void FixedUpdate()
+    {
+        rotateMe.isRotationDisabled = matchRotationOfGround();
+    }
+
     // Update is called once per frame
     void Update()
     {
         rotatedVelocity.velocityInLocalSpace.x = inputDirection.x * speed;
+
+        if ((jumpPressed && rotatedVelocity.isGrounded) || (jumpHeld && timeJumpHoldStarted + maxTimeJumpCanBeHeld > Time.time))
+        {
+            rotatedVelocity.velocityInLocalSpace.y = jumpSpeed;
+
+            if (!jumpHeld)
+            {
+                jumpHeld = true;
+                timeJumpHoldStarted = Time.time;
+            }
+
+            jumpPressed = false;
+        }
     }
 
     public void onMovePressed(InputAction.CallbackContext context)
@@ -57,17 +82,52 @@ public class Player : MonoBehaviour
         {
             onJump();
         }
+        else if (context.phase == InputActionPhase.Canceled)
+        {
+            jumpHeld = false;
+            jumpPressed = false;
+        }
     }
 
     public void onJump()
     {
-        if (isGrounded)
+        if (!rotatedVelocity)
+        {
+            rotatedVelocity = GetComponent<RotatedVelocity>();
+        }
+
+        if (rotatedVelocity.isGrounded || (jumpHeld && timeJumpHoldStarted + maxTimeJumpCanBeHeld < Time.time))
+        {
+            jumpPressed = true;
+        }
+    }
+
+    public bool matchRotationOfGround()
+    {
+        RaycastHit2D[] results = new RaycastHit2D[3];
+
+        int numRez = collider.Cast(-rotateMe.up, results, 0.2f);
+
+        for (int i = 0; i < numRez; ++i)
         {
 
-            rotatedVelocity.velocityInLocalSpace.y = jumpSpeed;
-            isGrounded = false;
-            rotateMe.isRotationDisabled = false;
+            if (results[i].collider.gameObject.tag == "somethingToignore")
+            {
+                continue;
+            }
+
+            var rotator = results[i].collider.GetComponent<RotateMe>();
+            Vector2 otherUpDirection = rotator.up;
+
+            if (Vector2.Dot(results[i].normal, otherUpDirection) > 0.3)
+            {
+                transform.rotation = rotator.transform.rotation;
+                return true;
+            }
         }
+
+        return false;
+
     }
 
     private void OnCollisionEnter2D(Collision2D other)
@@ -75,13 +135,22 @@ public class Player : MonoBehaviour
 
         var contact = other.GetContact(0);
         //collision happend on top, top is direction of black hole
-        if (Vector2.Dot(contact.normal, other.gameObject.GetComponent<RotateMe>().toBlackhole) > 0.5)
+        if (Vector2.Dot(contact.normal, other.gameObject.GetComponent<RotateMe>().up) > 0.3)
         {
 
             transform.rotation = other.transform.rotation;
-            // transform.position = other.transform.position + other.collider.bounds.extents.y * new Vector3(contact.normal.x, contact.normal.y, 0);
-            rotatedVelocity.velocityInLocalSpace.y = 0;
-            isGrounded = true;
+            rotateMe.isRotationDisabled = true;
+        }
+    }
+
+    private void OnCollisionStay2D(Collision2D other)
+    {
+        var contact = other.GetContact(0);
+        //collision happend on top, top is direction of black hole
+        if (Vector2.Dot(contact.normal, other.gameObject.GetComponent<RotateMe>().up) > 0.3)
+        {
+
+            transform.rotation = other.transform.rotation;
             rotateMe.isRotationDisabled = true;
         }
     }

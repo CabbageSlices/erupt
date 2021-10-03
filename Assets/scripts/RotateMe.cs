@@ -14,6 +14,23 @@ public class RotateMe : MonoBehaviour
 
     public bool isRotationDisabled = false;
 
+    public Vector2 right
+    {
+        get
+        {
+
+            return -new Vector2(transform.right.x, transform.right.y).normalized;
+        }
+    }
+
+    public Vector2 up
+    {
+        get
+        {
+            return new Vector2(transform.up.x, transform.up.y).normalized;
+        }
+    }
+
     public Vector2 toBlackhole
     {
         get
@@ -23,8 +40,6 @@ public class RotateMe : MonoBehaviour
 
             float angle = (Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
 
-
-            //pretend angle pointing straigt up is 0
             float angle2 = Mathf.RoundToInt(angle / gameManager.rotationRegionSizeInDegrees) * gameManager.rotationRegionSizeInDegrees;
 
             float x = Mathf.Cos(angle2 * Mathf.Deg2Rad);
@@ -47,7 +62,7 @@ public class RotateMe : MonoBehaviour
 
         if (!isRotationDisabled)
         {
-            Vector3 newUp = toBlackhole;
+            Vector3 newUp = -toBlackhole;
             Vector3 up = new Vector3(transform.up.x, transform.up.y, 0);
 
             Quaternion deltaRotation = Quaternion.FromToRotation(up, newUp);

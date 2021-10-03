@@ -20,10 +20,21 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    [SerializeField]
+    public List<GameObject> spawnPositions = new List<GameObject>();
+
+    int spawnPositionIndexToUseNext = 0;
+
     // Start is called before the first frame update
     void Start()
     {
+        GameObject spawnPositionParent = GameObject.FindWithTag("spawnPositions");
 
+        spawnPositions.Clear();
+        foreach (Transform child in spawnPositionParent.transform)
+        {
+            spawnPositions.Add(child.gameObject);
+        }
     }
 
     void Awake()
@@ -35,6 +46,25 @@ public class GameManager : MonoBehaviour
     void Update()
     {
 
+    }
+
+    public void onPlayerJoin(PlayerInput input)
+    {
+
+        setSpawnPosition(input.gameObject);
+        // Destroy(input.gameObject);
+    }
+
+
+    public void setSpawnPosition(GameObject player)
+    {
+        if (spawnPositions.Count == 0)
+        {
+            return;
+        }
+
+        player.transform.position = spawnPositions[spawnPositionIndexToUseNext].transform.position;
+        spawnPositionIndexToUseNext = (spawnPositionIndexToUseNext + 1) % spawnPositions.Count;
     }
 
     public void onPlayerLeft(PlayerInput input)
