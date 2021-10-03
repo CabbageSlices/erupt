@@ -71,6 +71,11 @@ public class RotateMe : MonoBehaviour
             {
 
                 transform.rotation = Quaternion.Slerp(transform.rotation, deltaRotation * transform.rotation, Time.deltaTime * rotationSpeed);
+
+                if (Vector3.Magnitude(newUp - up) < 0.3)
+                {
+                    transform.rotation = deltaRotation * transform.rotation;
+                }
             }
             else
             {

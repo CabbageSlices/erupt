@@ -29,6 +29,15 @@ public class Player : MonoBehaviour
 
     RotatedVelocity rotatedVelocity;
 
+    public Player guyWhoSquishedMe = null;
+
+    public bool squished = false;
+
+    public float timeBecameSquished = 0;
+    public float howLongToStaySquished = 4f;
+
+    public float originalScale = 1;
+
     private void Awake()
     {
         if (!rotateMe)
@@ -40,6 +49,8 @@ public class Player : MonoBehaviour
 
         rotatedVelocity = GetComponent<RotatedVelocity>();
         body = GetComponent<Rigidbody2D>();
+
+        originalScale = transform.localScale.y;
     }
 
     // Start is called before the first frame update
@@ -57,25 +68,42 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        float actualSpeed = squished ? speed * 0.1f : speed;
+
         //want the right button to always go towards the right
-        rotatedVelocity.velocityInLocalSpace.x = inputDirection.x * speed;
+        rotatedVelocity.velocityInLocalSpace.x = inputDirection.x * actualSpeed;
 
-        if ((jumpPressed && rotatedVelocity.isGrounded) || (jumpHeld && timeJumpHoldStarted + maxTimeJumpCanBeHeld > Time.time))
+        if (!squished)
         {
-            rotatedVelocity.velocityInLocalSpace.y = jumpSpeed;
-
-            if (!jumpHeld)
+            if ((jumpPressed && rotatedVelocity.isGrounded) || (jumpHeld && timeJumpHoldStarted + maxTimeJumpCanBeHeld > Time.time))
             {
-                jumpHeld = true;
-                timeJumpHoldStarted = Time.time;
-            }
+                rotatedVelocity.velocityInLocalSpace.y = jumpSpeed;
 
-            jumpPressed = false;
+                if (!jumpHeld)
+                {
+                    jumpHeld = true;
+                    timeJumpHoldStarted = Time.time;
+                }
+
+                jumpPressed = false;
+            }
+        }
+        else
+        {
+            if (timeBecameSquished + howLongToStaySquished < Time.time)
+            {
+                doUnsquish();
+            }
         }
     }
 
     public void onMovePressed(InputAction.CallbackContext context)
     {
+        if (!rotateMe)
+        {
+            rotateMe = GetComponent<RotateMe>();
+        }
         bool wasThereHorizontalMovementBefore = true;
 
         if (inputDirection.x == 0)
@@ -92,7 +120,19 @@ public class Player : MonoBehaviour
         if (!wasThereHorizontalMovementBefore)
         {
             //horizontal movment just started, be sure to save direction of up vector so we can flip velocites as he moves to allwo for smooth movmeont
-            horizontalInputDirectionScale = rotateMe.up.y > 0 ? 1 : -1;
+            horizontalInputDirectionScale = rotateMe.up.y >= 0 ? 1 : -1;
+
+            if (Mathf.Abs(rotateMe.up.y) < 0.001 && rotateMe.right.y < 0)
+            {
+                horizontalInputDirectionScale = 1;
+            }
+
+            float angleOfRight = Mathf.Atan2(rotateMe.right.y, rotateMe.right.x) * Mathf.Rad2Deg;
+
+            if (angleOfRight <= -90 && angleOfRight > -180)
+            {
+                horizontalInputDirectionScale = 1;
+            }
         }
 
         inputDirection.x *= horizontalInputDirectionScale;
@@ -113,22 +153,14 @@ public class Player : MonoBehaviour
 
     public void onJump()
     {
-        if (!rotatedVelocity)
-        {
-            rotatedVelocity = GetComponent<RotatedVelocity>();
-        }
-
-        if (rotatedVelocity.isGrounded || (jumpHeld && timeJumpHoldStarted + maxTimeJumpCanBeHeld < Time.time))
-        {
-            jumpPressed = true;
-        }
+        jumpPressed = true;
     }
 
     public bool matchRotationOfGround()
     {
         RaycastHit2D[] results = new RaycastHit2D[3];
 
-        int numRez = collider.Cast(-rotateMe.up, results, 0.2f);
+        int numRez = collider.Cast(-rotateMe.up, results, 0.3f);
 
         for (int i = 0; i < numRez; ++i)
         {
@@ -162,6 +194,16 @@ public class Player : MonoBehaviour
 
             transform.rotation = other.transform.rotation;
             rotateMe.isRotationDisabled = true;
+
+            //player and other guy should be moving towards each other
+            if (other.gameObject.tag == "player")
+            {
+                Vector2 otherVelocity = other.gameObject.GetComponent<RotatedVelocity>().velocityInLocalSpace;
+                if (rotatedVelocity.velocityInLocalSpace.y - otherVelocity.y <= 0)
+                {
+                    other.gameObject.GetComponent<Player>().onSquish(this);
+                }
+            }
         }
     }
 
@@ -176,4 +218,29 @@ public class Player : MonoBehaviour
             rotateMe.isRotationDisabled = true;
         }
     }
+
+    public void onSquish(Player squisher)
+    {
+        if (!squished)
+        {
+            squished = true;
+            guyWhoSquishedMe = squisher;
+
+            doSquish();
+        }
+    }
+
+    public void doSquish()
+    {
+        transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y * 0.3f, transform.localScale.z);
+        timeBecameSquished = Time.time;
+    }
+
+    public void doUnsquish()
+    {
+        transform.localScale = new Vector3(transform.localScale.x, originalScale, transform.localScale.z);
+        squished = false;
+        guyWhoSquishedMe = null;
+    }
 }
+

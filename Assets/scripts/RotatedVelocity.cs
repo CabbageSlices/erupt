@@ -72,7 +72,7 @@ public class RotatedVelocity : MonoBehaviour
 
         RaycastHit2D[] results = new RaycastHit2D[4];
 
-        int numRez = collider.Cast(-rotateMe.up, results, 0.2f);
+        int numRez = collider.Cast(-rotateMe.up, results, 0.3f);
 
         for (int i = 0; i < numRez; ++i)
         {
