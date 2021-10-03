@@ -186,6 +186,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 3b43219a-be51-4072-a6fa-5b3184c8f8ca
     m_ActionName: UI/TrackedDeviceOrientation
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 820c27ab-3219-43be-9e99-56af40145d77
+    m_ActionName: Player/Grab[/DualShock4GamepadHID/buttonWest,/Keyboard/a]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
