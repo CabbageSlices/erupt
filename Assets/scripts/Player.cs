@@ -18,6 +18,8 @@ public class Player : MonoBehaviour
     public float speed = 15;
     public float jumpSpeed = 15;
 
+    float horizontalInputDirectionScale = 1;
+
     public GameObject blackHole;
     public GameManager gameManager;
     public RotateMe rotateMe;
@@ -55,6 +57,7 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //want the right button to always go towards the right
         rotatedVelocity.velocityInLocalSpace.x = inputDirection.x * speed;
 
         if ((jumpPressed && rotatedVelocity.isGrounded) || (jumpHeld && timeJumpHoldStarted + maxTimeJumpCanBeHeld > Time.time))
@@ -73,7 +76,26 @@ public class Player : MonoBehaviour
 
     public void onMovePressed(InputAction.CallbackContext context)
     {
+        bool wasThereHorizontalMovementBefore = true;
+
+        if (inputDirection.x == 0)
+        {
+            wasThereHorizontalMovementBefore = false;
+        }
         inputDirection = context.ReadValue<Vector2>().normalized;
+
+        if (inputDirection.x == 0)
+        {
+            return;
+        }
+
+        if (!wasThereHorizontalMovementBefore)
+        {
+            //horizontal movment just started, be sure to save direction of up vector so we can flip velocites as he moves to allwo for smooth movmeont
+            horizontalInputDirectionScale = rotateMe.up.y > 0 ? 1 : -1;
+        }
+
+        inputDirection.x *= horizontalInputDirectionScale;
     }
 
     public void onJumpPressed(InputAction.CallbackContext context)
@@ -154,21 +176,4 @@ public class Player : MonoBehaviour
             rotateMe.isRotationDisabled = true;
         }
     }
-
-    // private void OnCollisionExit2D(Collision2D other)
-    // {
-
-    //     var contact = other.GetContact(0);
-    //     //collision happend on top, top is direction of black hole
-    //     if (Vector2.Dot(contact.normal, rotateMe.toBlackhole) > 0.5)
-    //     {
-
-    //         transform.rotation = other.transform.rotation;
-    //         // transform.position = other.transform.position + other.collider.bounds.extents.y * new Vector3(contact.normal.x, contact.normal.y, 0);
-    //         Debug.Log("POINT: " + contact.point);
-    //         velocityInLocalSpace.y = 0;
-    //         isGrounded = true;
-    //         rotateMe.isRotationDisabled = true;
-    //     }
-    // }
 }

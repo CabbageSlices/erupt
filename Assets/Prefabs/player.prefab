@@ -32,7 +32,7 @@ Transform:
   m_GameObject: {fileID: 301462546928080969}
   m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: -3, y: 4, z: 1}
+  m_LocalScale: {x: -2.5, y: 3.5, z: 1}
   m_Children:
   - {fileID: 7500890356252591210}
   m_Father: {fileID: 0}
@@ -220,9 +220,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputDirection: {x: 0, y: 0}
-  maxTimeJumpCanBeHeld: 0.25
-  speed: 25
-  jumpSpeed: 35
+  maxTimeJumpCanBeHeld: 0.35
+  speed: 28
+  jumpSpeed: 25
   blackHole: {fileID: 0}
   gameManager: {fileID: 0}
   rotateMe: {fileID: 0}
