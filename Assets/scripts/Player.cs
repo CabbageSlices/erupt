@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(RotatedVelocity))]
 public class Player : MonoBehaviour
@@ -38,6 +39,12 @@ public class Player : MonoBehaviour
 
     public float originalScale = 1;
 
+    public int playerNumber = 1;
+
+    public SpriteRenderer sprite;
+
+    public Text numberDisplay;
+
     private void Awake()
     {
         if (!rotateMe)
@@ -51,6 +58,8 @@ public class Player : MonoBehaviour
         body = GetComponent<Rigidbody2D>();
 
         originalScale = transform.localScale.y;
+
+        sprite = GetComponent<SpriteRenderer>();
     }
 
     // Start is called before the first frame update
@@ -58,11 +67,19 @@ public class Player : MonoBehaviour
     {
         blackHole = GameObject.FindWithTag("blackHole");
         gameManager = GameObject.FindWithTag("gameManager").GetComponent<GameManager>();
+
     }
 
     private void FixedUpdate()
     {
         rotateMe.isRotationDisabled = matchRotationOfGround();
+    }
+
+    public void setPlayerNumber(int num)
+    {
+        Debug.Log("SETME:" + num);
+        playerNumber = num;
+        numberDisplay.text = num.ToString();
     }
 
     // Update is called once per frame
@@ -96,10 +113,27 @@ public class Player : MonoBehaviour
                 doUnsquish();
             }
         }
+
+        //don't flip if velocity is equal to zero, that way he reminas facing same dfriectio nwhen he sotps moving
+
+        if (rotatedVelocity.velocityInLocalSpace.x < 0)
+        {
+            sprite.flipX = false;
+        }
+
+        if (rotatedVelocity.velocityInLocalSpace.x > 0)
+        {
+            sprite.flipX = true;
+        }
     }
 
     public void onMovePressed(InputAction.CallbackContext context)
     {
+        if (context.phase == InputActionPhase.Canceled)
+        {
+
+            Debug.Log(context.phase);
+        }
         if (!rotateMe)
         {
             rotateMe = GetComponent<RotateMe>();
@@ -128,7 +162,6 @@ public class Player : MonoBehaviour
             }
 
             float angleOfRight = Mathf.Atan2(rotateMe.right.y, rotateMe.right.x) * Mathf.Rad2Deg;
-
             if (angleOfRight <= -90 && angleOfRight > -180)
             {
                 horizontalInputDirectionScale = 1;

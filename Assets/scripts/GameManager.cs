@@ -20,10 +20,24 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public GameObject[] players
+    {
+        get
+        {
+            return GameObject.FindGameObjectsWithTag("player");
+        }
+    }
+
     [SerializeField]
     public List<GameObject> spawnPositions = new List<GameObject>();
 
+    [SerializeField]
+    public Texture2D playerSpriteTexture;
+
+    public Sprite[] playerSprites;
+
     int spawnPositionIndexToUseNext = 0;
+    int playerSpriteToUseNext = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -40,6 +54,8 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         currentGravity = initialGravity;
+        playerSprites = Resources.LoadAll<Sprite>(playerSpriteTexture.name);
+        Debug.Log(playerSprites.Length);
     }
 
     // Update is called once per frame
@@ -50,9 +66,30 @@ public class GameManager : MonoBehaviour
 
     public void onPlayerJoin(PlayerInput input)
     {
-
+        int newNumber = players.Length;
+        var player = input.gameObject.GetComponent<Player>();
+        player.setPlayerNumber(newNumber);
         setSpawnPosition(input.gameObject);
-        // Destroy(input.gameObject);
+        setPlayerSprite(input.gameObject);
+    }
+
+    public void onSpawnPlayer(GameObject player)
+    {
+        int newNumber = players.Length;
+        player.GetComponent<Player>().setPlayerNumber(newNumber);
+        // setPlayerSprite(player);
+    }
+
+    public void setPlayerSprite(GameObject player)
+    {
+        if (playerSprites.Length == 0)
+        {
+            return;
+        }
+
+        int spriteIndex = Random.Range(0, playerSprites.Length - 1);
+
+        player.GetComponent<SpriteRenderer>().sprite = playerSprites[spriteIndex];
     }
 
 
