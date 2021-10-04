@@ -39,7 +39,7 @@ public class Player : MonoBehaviour
 
     public float originalScale = 1;
 
-    public int playerNumber = 1;
+    public int playerNumber = 0;
 
     public SpriteRenderer sprite;
 
@@ -77,7 +77,7 @@ public class Player : MonoBehaviour
 
     public void setPlayerNumber(int num)
     {
-        Debug.Log("SETME:" + num);
+
         playerNumber = num;
         numberDisplay.text = num.ToString();
     }
@@ -129,11 +129,6 @@ public class Player : MonoBehaviour
 
     public void onMovePressed(InputAction.CallbackContext context)
     {
-        if (context.phase == InputActionPhase.Canceled)
-        {
-
-            Debug.Log(context.phase);
-        }
         if (!rotateMe)
         {
             rotateMe = GetComponent<RotateMe>();
@@ -162,7 +157,7 @@ public class Player : MonoBehaviour
             }
 
             float angleOfRight = Mathf.Atan2(rotateMe.right.y, rotateMe.right.x) * Mathf.Rad2Deg;
-            if (angleOfRight <= -90 && angleOfRight > -180)
+            if (angleOfRight <= -90 && angleOfRight > -140)
             {
                 horizontalInputDirectionScale = 1;
             }

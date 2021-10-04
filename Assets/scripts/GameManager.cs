@@ -39,9 +39,18 @@ public class GameManager : MonoBehaviour
     int spawnPositionIndexToUseNext = 0;
     int playerSpriteToUseNext = 0;
 
+    int nextPlayerNum = 1;
+
     // Start is called before the first frame update
     void Start()
     {
+
+    }
+
+    void Awake()
+    {
+        currentGravity = initialGravity;
+        playerSprites = Resources.LoadAll<Sprite>(playerSpriteTexture.name);
         GameObject spawnPositionParent = GameObject.FindWithTag("spawnPositions");
 
         spawnPositions.Clear();
@@ -49,13 +58,6 @@ public class GameManager : MonoBehaviour
         {
             spawnPositions.Add(child.gameObject);
         }
-    }
-
-    void Awake()
-    {
-        currentGravity = initialGravity;
-        playerSprites = Resources.LoadAll<Sprite>(playerSpriteTexture.name);
-        Debug.Log(playerSprites.Length);
     }
 
     // Update is called once per frame
@@ -66,7 +68,7 @@ public class GameManager : MonoBehaviour
 
     public void onPlayerJoin(PlayerInput input)
     {
-        int newNumber = players.Length;
+        int newNumber = nextPlayerNum++;
         var player = input.gameObject.GetComponent<Player>();
         player.setPlayerNumber(newNumber);
         setSpawnPosition(input.gameObject);
@@ -107,5 +109,15 @@ public class GameManager : MonoBehaviour
     public void onPlayerLeft(PlayerInput input)
     {
         // Destroy(input.gameObject);
+    }
+
+    public void setPlayersToSpawnLocation()
+    {
+        var _players = players;
+
+        foreach (var player in _players)
+        {
+            setSpawnPosition(player);
+        }
     }
 }
