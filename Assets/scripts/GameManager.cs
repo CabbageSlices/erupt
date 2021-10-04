@@ -49,8 +49,15 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
+        // DontDestroyOnLoad(gameObject);
+
         currentGravity = initialGravity;
         playerSprites = Resources.LoadAll<Sprite>(playerSpriteTexture.name);
+        resetReferences();
+    }
+
+    public void resetReferences()
+    {
         GameObject spawnPositionParent = GameObject.FindWithTag("spawnPositions");
 
         spawnPositions.Clear();

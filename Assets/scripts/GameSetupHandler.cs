@@ -31,6 +31,12 @@ public class GameSetupHandler : MonoBehaviour
     public float timeGameEnded;
     public float victoryScreenDisplayTime = 4;
 
+    public AudioClip onStartSFX;
+    public AudioClip victorySfx;
+    public AudioClip countdownBeepSfx;
+
+    public AudioSource audioPlayer;
+
     public GameObject[] players
     {
         get
@@ -46,6 +52,12 @@ public class GameSetupHandler : MonoBehaviour
         {
             float timeElapsed = Time.time - timeCountDownStarted;
             int countdownNumber = Mathf.CeilToInt(numberToCountDownFrom - timeElapsed);
+
+            if (countdownNumber.ToString() != countdownText.text)
+            {
+
+                audioPlayer.PlayOneShot(countdownBeepSfx);
+            }
             countdownText.text = countdownNumber.ToString();
 
             if (countdownNumber <= 0)
@@ -80,23 +92,29 @@ public class GameSetupHandler : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        audioPlayer = GetComponent<AudioSource>();
+    }
+
     void Start()
     {
         countdownText.gameObject.SetActive(false);
         gameManager = GameObject.FindWithTag("gameManager");
 
-        if (gameManager != null)
+        if (gameManager == null)
+        {
+            createGameManager();
+        }
+
+        if (players.Length > 0)
         {
             state = GameState.PRELOAD;
             //we just laoded a scene
             onSceneLoad();
             beginCountDown();
         }
-        else
-        {
-            //we loaded screen from scratch
-            createGameManager();
-        }
+
     }
 
     public void onVictory()
@@ -116,11 +134,15 @@ public class GameSetupHandler : MonoBehaviour
         countdownText.enabled = true;
         state = GameState.ENDING;
         timeGameEnded = Time.time;
+
+        audioPlayer.PlayOneShot(victorySfx);
     }
 
     public void goBackToMainMenu()
     {
         Destroy(gameManager);
+
+        Destroy(GameObject.FindWithTag("bgm"));
 
         var _players = players;
 
@@ -148,6 +170,8 @@ public class GameSetupHandler : MonoBehaviour
         }
 
         state = GameState.PLAYING;
+
+        audioPlayer.PlayOneShot(onStartSFX);
     }
 
     public void createGameManager()
@@ -162,6 +186,7 @@ public class GameSetupHandler : MonoBehaviour
         countdownText.gameObject.SetActive(true);
         timeCountDownStarted = Time.time;
         countdownText.text = numberToCountDownFrom.ToString();
+        audioPlayer.PlayOneShot(countdownBeepSfx);
     }
 
     public void hideText()
@@ -174,15 +199,20 @@ public class GameSetupHandler : MonoBehaviour
     {
         //get all players and disable their gameplay and stuff
         gameManager.GetComponent<PlayerInputManager>().DisableJoining();
+        gameManager.GetComponent<GameManager>().resetReferences();
 
 
         var _players = players;
 
         foreach (var player in _players)
         {
-            player.GetComponent<Player>().doUnsquish();
-            player.GetComponent<Player>().enabled = false;
+            var playerS = player.GetComponent<Player>();
+            playerS.resetReferences();
+            playerS.doUnsquish();
+            playerS.doUnsquish();
+            playerS.enabled = false;
             player.GetComponent<Rigidbody2D>().isKinematic = true;
+            player.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
             player.GetComponent<RotatedVelocity>().enabled = false;
         }
 

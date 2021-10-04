@@ -36,6 +36,10 @@ public class RotateMe : MonoBehaviour
         get
         {
 
+            if (blackHole == null)
+            {
+                blackHole = GameObject.FindWithTag("blackHole");
+            }
             Vector2 dir = (blackHole.transform.position - transform.position).normalized;
 
             float angle = (Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);

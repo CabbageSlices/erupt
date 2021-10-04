@@ -23,6 +23,9 @@ public class Player : MonoBehaviour
 
     public GameObject blackHole;
     public GameManager gameManager;
+
+    public MenuController menuController;
+
     public RotateMe rotateMe;
     public Collider2D collider;
 
@@ -45,12 +48,21 @@ public class Player : MonoBehaviour
 
     public Text numberDisplay;
 
+    public AudioClip onSpawnSfx;
+    public AudioClip onJumpSfx;
+    public AudioClip onSquishSfx;
+    public AudioClip onOnSquishSfx;
+
+    public AudioSource audioPlayer;
+
     private void Awake()
     {
         if (!rotateMe)
         {
             rotateMe = GetComponent<RotateMe>();
         }
+
+        audioPlayer = GetComponent<AudioSource>();
 
         collider = GetComponent<Collider2D>();
 
@@ -60,14 +72,28 @@ public class Player : MonoBehaviour
         originalScale = transform.localScale.y;
 
         sprite = GetComponent<SpriteRenderer>();
+
+        DontDestroyOnLoad(gameObject);
+    }
+
+    public void resetReferences()
+    {
+        blackHole = GameObject.FindWithTag("blackHole");
+        gameManager = GameObject.FindWithTag("gameManager").GetComponent<GameManager>();
+
+        GameObject menu = GameObject.FindWithTag("menuController");
+
+        if (menu)
+        {
+            menuController = menu.GetComponent<MenuController>();
+        }
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        blackHole = GameObject.FindWithTag("blackHole");
-        gameManager = GameObject.FindWithTag("gameManager").GetComponent<GameManager>();
-
+        resetReferences();
+        audioPlayer.PlayOneShot(onSpawnSfx);
     }
 
     private void FixedUpdate()
@@ -99,6 +125,7 @@ public class Player : MonoBehaviour
 
                 if (!jumpHeld)
                 {
+                    audioPlayer.PlayOneShot(onJumpSfx);
                     jumpHeld = true;
                     timeJumpHoldStarted = Time.time;
                 }
@@ -110,7 +137,7 @@ public class Player : MonoBehaviour
         {
             if (timeBecameSquished + howLongToStaySquished < Time.time)
             {
-                doUnsquish();
+                doUnsquish(true);
             }
         }
 
@@ -157,7 +184,7 @@ public class Player : MonoBehaviour
             }
 
             float angleOfRight = Mathf.Atan2(rotateMe.right.y, rotateMe.right.x) * Mathf.Rad2Deg;
-            if (angleOfRight <= -90 && angleOfRight > -140)
+            if (angleOfRight <= -90 && angleOfRight > -110)
             {
                 horizontalInputDirectionScale = 1;
             }
@@ -176,6 +203,23 @@ public class Player : MonoBehaviour
         {
             jumpHeld = false;
             jumpPressed = false;
+        }
+    }
+
+    public void onStartPressed(InputAction.CallbackContext context)
+    {
+        if (menuController == null)
+        {
+            return;
+        }
+
+        if (context.phase == InputActionPhase.Performed)
+        {
+            menuController.onStartPressed();
+        }
+        else if (context.phase == InputActionPhase.Canceled)
+        {
+            menuController.onStartReleased();
         }
     }
 
@@ -262,13 +306,19 @@ public class Player : MonoBehaviour
     {
         transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y * 0.3f, transform.localScale.z);
         timeBecameSquished = Time.time;
+        audioPlayer.PlayOneShot(onSquishSfx);
     }
 
-    public void doUnsquish()
+    public void doUnsquish(bool playSfx = false)
     {
         transform.localScale = new Vector3(transform.localScale.x, originalScale, transform.localScale.z);
         squished = false;
         guyWhoSquishedMe = null;
+
+        if (playSfx)
+        {
+            audioPlayer.PlayOneShot(onOnSquishSfx);
+        }
     }
 }
 

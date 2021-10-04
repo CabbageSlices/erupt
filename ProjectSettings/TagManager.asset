@@ -8,6 +8,8 @@ TagManager:
   - blackHole
   - gameManager
   - spawnPositions
+  - menuController
+  - bgm
   layers:
   - Default
   - TransparentFX

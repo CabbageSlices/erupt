@@ -1,0 +1,19 @@
+Ouroboros bgm - https://incompetech.filmmusic.io/song/4996-ouroboros/
+
+spawn sfx - https://www.storyblocks.com/audio/stock/8-bit-basic-hit-5-seu503lpsk0wy4wpy.html?preview=1
+
+blackhole suction sfx https://www.storyblocks.com/audio/stock/video-game-fail-sound-2-he2zctr2uvrk0wy4ma0.html
+
+jumping - https://www.dreamstime.com/royalty-free-sound-fx-arcade-game-jump-chiptune-bit-coin-select-sound-effect-audio90130205
+
+squish - https://www.storyblocks.com/audio/stock/punch-face-hard-hxr-vnt2idhk0wxxcmu.html
+
+progress bar - http://freesoundeffect.net/sound/data-scrolling-typical-6-sound-effect
+
+unsquish - https://www.storyblocks.com/audio/stock/8-bit-jump-sound-1-hezuv9cniprk0wy4wkm.html
+
+game start - https://www.storyblocks.com/audio/stock/accept-confirm-sound-9-hf4zmlzuad8k8umg2d9.html
+
+count odwn -https://www.storyblocks.com/audio/stock/game-race-start-countdown-timer-bzzn4_mtduk8p0zocz.html
+
+victory - https://www.storyblocks.com/audio/stock/video-game-ascending-hits-sx07ckrh8whk0wy4mdg.html
